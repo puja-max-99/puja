@@ -1,0 +1,6 @@
+{
+  "name": "PujaJunction.com",
+  "description": "भारत का विश्वसनीय वैदिक पूजा सामग्री किट, पंडित बुकिंग, मूर्ति, 17-श्रेणी पंचांग एवं सेवा दक्षिणा पोर्टल।",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
