@@ -84,7 +84,7 @@ export const HeroOfferSlider: React.FC<HeroOfferSliderProps> = ({
 
   return (
     <div
-      className="relative w-full"
+      className="relative w-full lg:min-h-[500px] lg:flex lg:flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       aria-roledescription="carousel"
@@ -117,8 +117,8 @@ export const HeroOfferSlider: React.FC<HeroOfferSliderProps> = ({
           );
         })}
 
-        {/* Subtle Left Text-Readability Gradient Only (No Bottom Fade) */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent" />
+        {/* Clean image on mobile/tablet (soft bottom dot scrim); left text scrim on desktop */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent lg:bg-gradient-to-r lg:from-black/70 lg:via-black/35 lg:to-transparent" />
       </div>
 
       {/* Left / Right Navigation Arrows */}
@@ -140,9 +140,9 @@ export const HeroOfferSlider: React.FC<HeroOfferSliderProps> = ({
       </button>
 
       {/* Foreground Offer Copy */}
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-6 sm:pt-9 sm:pb-8 lg:pt-11 lg:pb-9">
-        <div className="max-w-6xl mx-auto md:px-6 lg:px-2">
-          <div className="min-h-[160px] sm:min-h-[180px] lg:min-h-[195px] flex flex-col justify-center max-w-2xl text-left">
+      <div className="relative z-20 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6 pb-8 sm:pt-9 sm:pb-11 lg:pt-14 lg:pb-14 min-h-[190px] sm:min-h-[245px] md:min-h-[295px] lg:min-h-[500px] flex flex-col justify-end">
+        <div className="max-w-6xl mx-auto md:px-6 lg:px-2 w-full lg:flex-1 lg:flex lg:flex-col lg:justify-between">
+          <div className="hidden lg:flex lg:my-auto flex-col justify-center max-w-2xl text-left">
             <div className="text-[11px] sm:text-xs font-bold tracking-wide text-amber-300 mb-1.5">
               {activeSlide.kicker}
             </div>

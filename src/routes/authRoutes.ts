@@ -383,11 +383,14 @@ router.post('/auth/forgot-password', async (req: AuthRequest, res) => {
       });
     }
 
+    const exposeDemoToken =
+      process.env.NODE_ENV !== 'production' || process.env.ALLOW_DEMO_RESET_TOKEN === 'true';
+
     res.json({
       success: true,
       data: {
         message: 'यदि यह ईमेल पंजीकृत है, तो रीसेट कोड तैयार हो गया है (1 घंटे के लिए वैध)।',
-        resetToken, // Returned so user can test full password reset flow without external SMTP
+        ...(exposeDemoToken ? { resetToken } : {}),
       },
     });
   } catch (error) {
@@ -491,7 +494,7 @@ router.post('/auth/logout-all', requireAuth, async (req: AuthRequest, res) => {
     await db
       .delete(authTokens)
       .where(and(eq(authTokens.userId, req.authUser!.id), eq(authTokens.type, 'session')));
-    res.clearCookie('pj_session', { path: '/' });
+    await clearUserSession(req, res);
     res.json({ success: true, data: { loggedOutAll: true } });
   } catch (error) {
     console.error('Logout all failed:', error);
@@ -709,7 +712,7 @@ router.patch('/me', requireAuth, async (req: AuthRequest, res) => {
 router.delete('/me', requireAuth, async (req: AuthRequest, res) => {
   try {
     await db.delete(users).where(eq(users.id, req.authUser!.id));
-    res.clearCookie('pj_session', { path: '/' });
+    await clearUserSession(req, res);
     res.json({ success: true, data: { deleted: true } });
   } catch (error) {
     console.error('Delete account failed:', error);

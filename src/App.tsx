@@ -248,8 +248,13 @@ export default function App() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimerRef = useRef<number | null>(null);
 
+  // Floating Bottom-Right Search State
+  const [floatingSearchOpen, setFloatingSearchOpen] = useState(false);
+
   const searchWrapperRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const floatingSearchRef = useRef<HTMLDivElement>(null);
+  const floatingSearchInputRef = useRef<HTMLInputElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const showToast = useCallback((msg: string) => {
@@ -376,11 +381,15 @@ export default function App() {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
       }
+      if (floatingSearchRef.current && !floatingSearchRef.current.contains(e.target as Node)) {
+        setFloatingSearchOpen(false);
+      }
     };
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setDropdownOpen(false);
         setUserMenuOpen(false);
+        setFloatingSearchOpen(false);
       }
     };
     document.addEventListener('click', onDocClick);
@@ -390,6 +399,15 @@ export default function App() {
       document.removeEventListener('keydown', onKeyDown);
     };
   }, []);
+
+  // Auto-focus floating search input when opened
+  useEffect(() => {
+    if (floatingSearchOpen) {
+      window.setTimeout(() => {
+        floatingSearchInputRef.current?.focus();
+      }, 60);
+    }
+  }, [floatingSearchOpen]);
 
   // Persist guest cart to localStorage when logged out
   useEffect(() => {
@@ -1140,9 +1158,6 @@ export default function App() {
                   Puja<span className="text-saffron">Junction</span>
                   <span className="text-sm sm:text-base font-extrabold text-gray-700">.com</span>
                 </div>
-                <div className="text-[11px] font-semibold tracking-wide text-gray-500 mt-0.5">
-                  वैदिक किट, पंडित, मूर्ति व सेवा दक्षिणा
-                </div>
               </div>
             </a>
 
@@ -1550,208 +1565,157 @@ export default function App() {
 
       {/* ==================== BHAGWA SEARCH CONSOLE (FLUSH BELOW HERO SECTION) ==================== */}
       {activePage === 'home' && (
-      <div className="bg-gradient-to-r from-[#ea580c] via-[#f97316] to-[#ea580c] py-3 sm:py-3.5 px-4 sm:px-6 lg:px-8 relative z-30 overflow-visible shadow-md no-print">
+      <div className="w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] max-w-6xl mx-auto -mt-7 sm:-mt-9 lg:-mt-10 mb-2.5 sm:mb-3 bg-gradient-to-r from-[#e84f00] via-[#ff5f00] to-[#e84f00] p-1.5 sm:p-2 rounded-2xl relative z-30 overflow-visible shadow-xl no-print">
         {/* Search Console with Layered Predictive Dropdown */}
-        <div className="max-w-6xl mx-auto relative z-40">
-          <div className="bg-white rounded-2xl shadow-lg p-2 sm:p-2.5 text-gray-900 border border-orange-200/70">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:divide-x lg:divide-gray-200 items-stretch">
-                {/* Master Predictive Search Input */}
-                <div
-                  ref={searchWrapperRef}
-                  className="lg:col-span-7 relative z-40 flex items-center px-3.5 py-2.5 hover:bg-orange-50/40 rounded-xl lg:rounded-none lg:rounded-l-xl transition"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-orange-50 text-saffron flex items-center justify-center mr-3 shrink-0">
-                    <i className="fa-solid fa-magnifying-glass text-base" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <label
-                      htmlFor="masterSearchInput"
-                      className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider"
-                    >
-                      क्या खोज रहे हैं? (Hindi / Hinglish)
-                    </label>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <input
-                        ref={searchInputRef}
-                        id="masterSearchInput"
-                        type="text"
-                        autoComplete="off"
-                        value={searchQuery}
-                        onFocus={() => setDropdownOpen(true)}
-                        onChange={(e) => {
-                          setSearchQuery(e.target.value);
+        <div className="w-full relative z-40">
+          <div
+            ref={searchWrapperRef}
+            className="relative z-40 bg-white rounded-xl sm:rounded-[14px] shadow-sm p-1.5 sm:p-2 text-gray-900"
+          >
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Master Predictive Search Input */}
+              <div className="flex-1 min-w-0 flex items-center px-2 sm:px-3.5 py-1.5 sm:py-2 hover:bg-orange-50/40 rounded-lg sm:rounded-xl transition">
+                <div className="hidden sm:flex w-9 h-9 rounded-xl bg-orange-50 text-saffron items-center justify-center mr-3 shrink-0">
+                  <i className="fa-solid fa-magnifying-glass text-base" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <label
+                    htmlFor="masterSearchInput"
+                    className="hidden sm:block text-[11px] font-bold text-gray-400 uppercase tracking-wider"
+                  >
+                    क्या खोज रहे हैं? (Hindi / Hinglish)
+                  </label>
+                  <div className="flex items-center gap-1 sm:mt-0.5">
+                    <input
+                      ref={searchInputRef}
+                      id="masterSearchInput"
+                      type="text"
+                      autoComplete="off"
+                      aria-label="पूजा, सामग्री किट या पंडित खोजें"
+                      value={searchQuery}
+                      onFocus={() => setDropdownOpen(true)}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setActivePoojaTag('ALL');
+                        setVisibleCount(10);
+                        setHighlightedIdx(-1);
+                        setDropdownOpen(true);
+                      }}
+                      onKeyDown={handleSearchKeyDown}
+                      placeholder="सत्यनारायण, Griha Pravesh, पंडित..."
+                      className="w-full bg-transparent text-sm font-bold sm:font-extrabold text-gray-900 placeholder:font-medium sm:placeholder:font-semibold placeholder:text-gray-400 focus:outline-none truncate"
+                    />
+                    {searchQuery.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery('');
                           setActivePoojaTag('ALL');
                           setVisibleCount(10);
-                          setHighlightedIdx(-1);
-                          setDropdownOpen(true);
+                          searchInputRef.current?.focus();
                         }}
-                        onKeyDown={handleSearchKeyDown}
-                        placeholder="सत्यनारायण, Griha Pravesh, पंडित, घी..."
-                        className="w-full bg-transparent text-sm font-extrabold text-gray-900 placeholder:font-semibold placeholder:text-gray-400 focus:outline-none truncate"
-                      />
-                      {searchQuery.length > 0 && (
+                        title="साफ़ करें"
+                        className="text-gray-400 hover:text-abhiRed p-1 text-sm shrink-0 cursor-pointer"
+                      >
+                        <i className="fa-solid fa-circle-xmark" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={startVoiceSearch}
+                  title="बोलकर खोजें"
+                  className="ml-1.5 sm:ml-2 w-9 h-9 sm:w-auto sm:px-2.5 rounded-lg sm:rounded-xl bg-red-50 hover:bg-abhiRed text-abhiRed hover:text-white border border-red-200/80 flex items-center justify-center gap-1.5 shrink-0 transition cursor-pointer"
+                >
+                  <i className="fa-solid fa-microphone text-xs" />
+                  <span className="text-[11px] font-extrabold hidden sm:inline">बोलें</span>
+                </button>
+              </div>
+
+              {/* Search Submit */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (searchQuery.trim()) {
+                    saveRecentSearch(searchQuery);
+                    setDropdownOpen(false);
+                  } else {
+                    searchInputRef.current?.focus();
+                    setDropdownOpen(true);
+                  }
+                }}
+                className="shrink-0 h-10 sm:h-12 px-3.5 sm:px-6 lg:px-8 bg-gradient-to-r from-abhiRed to-saffron hover:from-abhiRedDark hover:to-orange-600 text-white font-extrabold text-xs sm:text-sm lg:text-base rounded-lg sm:rounded-xl shadow-sm transition flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer"
+              >
+                <i className="fa-solid fa-magnifying-glass text-xs sm:text-sm" />
+                <span>खोजें</span>
+              </button>
+            </div>
+
+            {/* Empty-Focus Dropdown (Recent Searches + Popular) — Full Width on Mobile & Desktop */}
+            {dropdownOpen && !searchQuery.trim() && (
+              <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 z-[9999] max-h-80 sm:max-h-96 overflow-y-auto box-scroll text-left">
+                {recentSearches.length > 0 && (
+                  <div className="px-3 sm:px-3.5 py-2.5 bg-gray-50/90 border-b border-gray-100">
+                    <div className="text-[11px] font-bold text-gray-400 mb-1.5 flex items-center gap-1.5">
+                      <i className="fa-solid fa-clock-rotate-left" /> हाल की खोज (Recent)
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {recentSearches.map((rs) => (
                         <button
+                          key={rs}
                           type="button"
+                          data-dropdown-item="true"
                           onClick={() => {
-                            setSearchQuery('');
+                            setSearchQuery(rs);
                             setActivePoojaTag('ALL');
-                            setVisibleCount(10);
-                            searchInputRef.current?.focus();
+                            saveRecentSearch(rs);
+                            setDropdownOpen(false);
                           }}
-                          title="साफ़ करें"
-                          className="text-gray-400 hover:text-abhiRed p-1 text-sm shrink-0 cursor-pointer"
+                          className="px-2.5 py-1 rounded-full bg-white border border-gray-200 hover:border-abhiRed text-xs font-bold text-gray-700 hover:text-abhiRed transition cursor-pointer"
                         >
-                          <i className="fa-solid fa-circle-xmark" />
+                          {rs}
                         </button>
-                      )}
+                      ))}
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={startVoiceSearch}
-                    title="बोलकर खोजें"
-                    className="ml-2 px-2.5 h-9 rounded-xl bg-red-50 hover:bg-abhiRed text-abhiRed hover:text-white border border-red-200/80 flex items-center gap-1.5 shrink-0 transition cursor-pointer"
-                  >
-                    <i className="fa-solid fa-microphone text-xs" />
-                    <span className="text-[11px] font-extrabold hidden sm:inline">बोलें</span>
-                  </button>
-
-                  {/* Empty-Focus Dropdown (Recent Searches + Popular) with High Z-Index */}
-                  {dropdownOpen && !searchQuery.trim() && (
-                    <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 z-[9999] max-h-96 overflow-y-auto box-scroll text-left">
-                      {recentSearches.length > 0 && (
-                        <div className="px-3.5 py-2.5 bg-gray-50/90 border-b border-gray-100">
-                          <div className="text-[11px] font-bold text-gray-400 mb-1.5 flex items-center gap-1.5">
-                            <i className="fa-solid fa-clock-rotate-left" /> हाल की खोज (Recent)
-                          </div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {recentSearches.map((rs) => (
-                              <button
-                                key={rs}
-                                type="button"
-                                data-dropdown-item="true"
-                                onClick={() => {
-                                  setSearchQuery(rs);
-                                  setActivePoojaTag('ALL');
-                                  saveRecentSearch(rs);
-                                  setDropdownOpen(false);
-                                }}
-                                className="px-2.5 py-1 rounded-full bg-white border border-gray-200 hover:border-abhiRed text-xs font-bold text-gray-700 hover:text-abhiRed transition cursor-pointer"
-                              >
-                                {rs}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      <div className="px-3.5 py-2 bg-cream border-b border-orange-100 text-[11px] font-extrabold text-saffron flex items-center justify-between">
-                        <span>🔥 लोकप्रिय पूजा, किट और पंडित</span>
-                        <span className="text-gray-400 font-semibold">↑↓ चुनें • Enter</span>
-                      </div>
-                      <div className="divide-y divide-gray-100">
-                        {POPULAR_SEARCHES.map((item) => (
-                          <button
-                            key={item.label}
-                            type="button"
-                            data-dropdown-item="true"
-                            onClick={() => {
-                              const clean = item.tag
-                                ? item.label.split('(')[0].trim()
-                                : item.keyword || item.label;
-                              setSearchQuery(clean);
-                              setActivePoojaTag(item.tag || 'ALL');
-                              saveRecentSearch(clean);
-                              setDropdownOpen(false);
-                            }}
-                            className="w-full text-left px-3.5 py-2.5 hover:bg-orange-50 flex items-center justify-between gap-2 transition cursor-pointer"
-                          >
-                            <span className="flex items-center gap-2.5 min-w-0">
-                              <i className="fa-solid fa-arrow-trend-up text-gray-400 text-xs shrink-0" />
-                              <span className="text-xs sm:text-sm font-bold text-gray-800 truncate">
-                                {item.label}
-                              </span>
-                            </span>
-                            <span className="text-[10px] font-extrabold bg-red-50 text-abhiRed px-2 py-0.5 rounded-full shrink-0">
-                              {item.type}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                )}
+                <div className="px-3 sm:px-3.5 py-2 bg-cream border-b border-orange-100 text-[11px] font-extrabold text-saffron flex items-center justify-between gap-2">
+                  <span>🔥 लोकप्रिय पूजा, किट और पंडित</span>
+                  <span className="hidden sm:inline text-gray-400 font-semibold">↑↓ चुनें • Enter</span>
                 </div>
-
-                {/* Date Picker */}
-                <div className="lg:col-span-3 flex items-center justify-between px-3.5 py-2.5 hover:bg-orange-50/40 transition border-t lg:border-t-0 border-gray-100">
-                  <div className="min-w-0 flex-1">
-                    <label
-                      htmlFor="bookingDateInput"
-                      className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider"
-                    >
-                      पूजा तिथि
-                    </label>
-                    <input
-                      id="bookingDateInput"
-                      type="date"
-                      min={getTodayIso(0)}
-                      value={bookingDate}
-                      onChange={(e) => setBookingDate(e.target.value)}
-                      className="w-full bg-transparent text-xs sm:text-sm font-extrabold text-gray-900 focus:outline-none mt-0.5 cursor-pointer"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1 ml-1.5 shrink-0">
+                <div className="divide-y divide-gray-100">
+                  {POPULAR_SEARCHES.map((item) => (
                     <button
+                      key={item.label}
                       type="button"
+                      data-dropdown-item="true"
                       onClick={() => {
-                        setQuickDateMode(0);
-                        setBookingDate(getTodayIso(0));
-                      }}
-                      className={
-                        quickDateMode === 0
-                          ? 'px-2 py-0.5 rounded text-[10px] font-extrabold bg-abhiRed text-white transition cursor-pointer'
-                          : 'px-2 py-0.5 rounded text-[10px] font-extrabold bg-gray-200 text-gray-700 hover:bg-gray-300 transition cursor-pointer'
-                      }
-                    >
-                      आज
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setQuickDateMode(1);
-                        setBookingDate(getTodayIso(1));
-                      }}
-                      className={
-                        quickDateMode === 1
-                          ? 'px-2 py-0.5 rounded text-[10px] font-extrabold bg-abhiRed text-white transition cursor-pointer'
-                          : 'px-2 py-0.5 rounded text-[10px] font-extrabold bg-gray-200 text-gray-700 hover:bg-gray-300 transition cursor-pointer'
-                      }
-                    >
-                      कल
-                    </button>
-                  </div>
-                </div>
-
-                {/* Search Submit */}
-                <div className="lg:col-span-2 p-1.5 flex items-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (searchQuery.trim()) {
-                        saveRecentSearch(searchQuery);
+                        const clean = item.tag
+                          ? item.label.split('(')[0].trim()
+                          : item.keyword || item.label;
+                        setSearchQuery(clean);
+                        setActivePoojaTag(item.tag || 'ALL');
+                        saveRecentSearch(clean);
                         setDropdownOpen(false);
-                      } else {
-                        searchInputRef.current?.focus();
-                        setDropdownOpen(true);
-                      }
-                    }}
-                    className="w-full h-full min-h-[48px] bg-gradient-to-r from-abhiRed to-saffron hover:from-abhiRedDark hover:to-orange-600 text-white font-extrabold text-sm sm:text-base rounded-xl shadow-sm transition flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <i className="fa-solid fa-magnifying-glass" />
-                    <span>खोजें</span>
-                  </button>
+                      }}
+                      className="w-full text-left px-3 sm:px-3.5 py-2.5 hover:bg-orange-50 flex items-center justify-between gap-2 transition cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+                        <i className="fa-solid fa-arrow-trend-up text-gray-400 text-xs shrink-0" />
+                        <span className="text-xs sm:text-sm font-bold text-gray-800 truncate">
+                          {item.label}
+                        </span>
+                      </span>
+                      <span className="text-[10px] font-extrabold bg-red-50 text-abhiRed px-2 py-0.5 rounded-full shrink-0">
+                        {item.type}
+                      </span>
+                    </button>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
+          </div>
 
             {/* ==================== INLINE USER-FRIENDLY SEARCH RESULTS PANEL (DIRECTLY BELOW SEARCH BOX) ==================== */}
             {(searchQuery.trim().length > 0 || activePoojaTag !== 'ALL') && (
@@ -2002,34 +1966,59 @@ export default function App() {
       {activePage === 'home' && (
       <section className="bg-amber-50/85 border-b border-amber-200/80 relative z-10 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-700">
-              <span className="font-extrabold text-abhiRed inline-flex items-center gap-1.5">
-                <i className="fa-solid fa-om text-saffron" /> आज का पंचांग
-              </span>
-              <span className="text-amber-300 hidden sm:inline">|</span>
-              <span className="font-bold text-gray-900">{todayHindiDate}</span>
-              <span className="text-amber-300 hidden sm:inline">·</span>
-              <span>
-                तिथि: <strong className="text-gray-900">{settings.panchangTithi}</strong>
-              </span>
-              <span className="text-amber-300 hidden sm:inline">·</span>
-              <span>
-                नक्षत्र: <strong className="text-gray-900">{settings.panchangNakshatra}</strong>
-              </span>
-              <span className="text-amber-300 hidden sm:inline">·</span>
-              <span className="text-green-800">
-                अभिजीत मुहूर्त: <strong className="tabular-nums">{settings.panchangAbhijit}</strong>
-              </span>
-              <span className="text-amber-300 hidden sm:inline">·</span>
-              <span className="text-abhiRed">
-                राहुकाल: <strong className="tabular-nums">{settings.panchangRahukaal}</strong>
-              </span>
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-3">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-x-3.5 sm:gap-y-1.5 text-xs text-gray-700 w-full lg:w-auto">
+              {/* Mobile Top Header Row (Inline on Tablet/Desktop) */}
+              <div className="flex items-center justify-between sm:justify-start gap-2 pb-1.5 sm:pb-0 border-b border-amber-200/70 sm:border-0">
+                <span className="font-extrabold text-abhiRed inline-flex items-center gap-1.5 shrink-0">
+                  <i className="fa-solid fa-om text-saffron" /> आज का पंचांग
+                </span>
+                <span className="text-amber-300 hidden sm:inline">|</span>
+                <span className="font-bold text-gray-900 text-[11px] sm:text-xs truncate">
+                  {todayHindiDate}
+                </span>
+              </div>
+
+              {/* Mobile 2x2 Compact Grid -> Inline Strip on Tablet/Desktop */}
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-1.5 sm:gap-x-3.5 sm:gap-y-1">
+                <span className="hidden sm:inline text-amber-300">·</span>
+                <span className="bg-white/80 sm:bg-transparent border border-amber-200/70 sm:border-0 rounded-lg sm:rounded-none px-2.5 py-1.5 sm:p-0 min-w-0">
+                  <span className="block sm:inline text-[10px] sm:text-xs text-gray-500 sm:text-gray-700">तिथि: </span>
+                  <strong className="text-gray-900 text-[11px] sm:text-xs truncate block sm:inline">
+                    {settings.panchangTithi}
+                  </strong>
+                </span>
+
+                <span className="hidden sm:inline text-amber-300">·</span>
+                <span className="bg-white/80 sm:bg-transparent border border-amber-200/70 sm:border-0 rounded-lg sm:rounded-none px-2.5 py-1.5 sm:p-0 min-w-0">
+                  <span className="block sm:inline text-[10px] sm:text-xs text-gray-500 sm:text-gray-700">नक्षत्र: </span>
+                  <strong className="text-gray-900 text-[11px] sm:text-xs truncate block sm:inline">
+                    {settings.panchangNakshatra}
+                  </strong>
+                </span>
+
+                <span className="hidden sm:inline text-amber-300">·</span>
+                <span className="bg-green-50/80 sm:bg-transparent border border-green-200/70 sm:border-0 rounded-lg sm:rounded-none px-2.5 py-1.5 sm:p-0 text-green-800 min-w-0">
+                  <span className="block sm:inline text-[10px] sm:text-xs">अभिजीत मुहूर्त: </span>
+                  <strong className="tabular-nums text-[11px] sm:text-xs block sm:inline">
+                    {settings.panchangAbhijit}
+                  </strong>
+                </span>
+
+                <span className="hidden sm:inline text-amber-300">·</span>
+                <span className="bg-red-50/75 sm:bg-transparent border border-red-200/70 sm:border-0 rounded-lg sm:rounded-none px-2.5 py-1.5 sm:p-0 text-abhiRed min-w-0">
+                  <span className="block sm:inline text-[10px] sm:text-xs">राहुकाल: </span>
+                  <strong className="tabular-nums text-[11px] sm:text-xs block sm:inline">
+                    {settings.panchangRahukaal}
+                  </strong>
+                </span>
+              </div>
             </div>
+
             <button
               type="button"
               onClick={handleBookInShubhMuhurat}
-              className="shrink-0 bg-abhiRed hover:bg-abhiRedDark text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="w-full sm:w-auto shrink-0 bg-abhiRed hover:bg-abhiRedDark text-white text-xs font-extrabold px-4 py-2.5 sm:py-2 rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               <span>शुभ मुहूर्त में पूजा बुक करें</span>
               <i className="fa-solid fa-arrow-right text-[10px]" />
@@ -2154,28 +2143,28 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full no-print">
         {/* Custom Puja List Upload Banner (Home & Pooja Kit pages) */}
         {(activePage === 'home' || activePage === 'pooja_box') && (
-        <div className="bg-gradient-to-r from-orange-50/85 via-white to-amber-50/85 border border-orange-200 rounded-2xl p-4 sm:p-5 mb-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xs">
-          <div className="flex items-start sm:items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-saffron to-abhiRed text-white flex items-center justify-center text-lg shrink-0 shadow-xs">
+        <div className="bg-gradient-to-r from-orange-50/85 via-white to-amber-50/85 border border-orange-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 mb-4 sm:mb-5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4 shadow-2xs">
+          <div className="flex items-start sm:items-center gap-3 sm:gap-3.5 min-w-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-saffron to-abhiRed text-white flex items-center justify-center text-base sm:text-lg shrink-0 shadow-xs">
               <i className="fa-solid fa-file-pen" />
             </div>
-            <div>
-              <div className="text-[11px] font-extrabold tracking-wide text-saffron mb-0.5">
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] sm:text-[11px] font-extrabold tracking-wide text-saffron mb-0.5">
                 कस्टम पूजा लिस्ट · मासिक रिमाइंडर
               </div>
-              <h2 className="text-base sm:text-lg font-extrabold text-gray-900">
+              <h2 className="text-sm sm:text-base md:text-lg font-extrabold text-gray-900 leading-snug">
                 पंडित जी की लिखी पूजा लिस्ट है? फोटो अपलोड करें या लिस्ट लिखकर बुक करें
               </h2>
-              <p className="text-xs sm:text-sm text-gray-600 mt-1">
+              <p className="text-[11px] sm:text-xs md:text-sm text-gray-600 mt-1 leading-relaxed line-clamp-2 sm:line-clamp-none">
                 अपनी हाथ से लिखी पर्ची की <strong className="text-gray-900">फोटो / PDF अपलोड करें</strong> या कस्टम सामग्री लिस्ट लिखें — आपका नज़दीकी पूजा भंडार पूरी लिस्ट पैक करके घर पहुंचाएगा।
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full md:w-auto shrink-0">
+          <div className="flex w-full md:w-auto shrink-0">
             <button
               type="button"
               onClick={() => setCustomListModalOpen(true)}
-              className="flex-1 md:flex-initial bg-abhiRed hover:bg-abhiRedDark text-white font-extrabold px-5 py-3 rounded-xl shadow-xs transition flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer whitespace-nowrap"
+              className="w-full md:w-auto bg-abhiRed hover:bg-abhiRedDark text-white font-extrabold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl shadow-xs transition flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer whitespace-nowrap"
             >
               <i className="fa-solid fa-file-arrow-up" />
               <span>पर्ची अपलोड करें</span>
@@ -2325,22 +2314,22 @@ export default function App() {
           {/* RIGHT MAIN COLUMN */}
           <div className="flex-1 min-w-0 w-full">
             {/* Result Count & Sort Strip */}
-            <div className="bg-white rounded-xl border border-gray-200 px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
-              <div className="flex items-center gap-2">
-                <i className="fa-solid fa-layer-group text-saffron text-xs" />
-                <span className="text-xs sm:text-sm font-extrabold text-gray-800 tabular-nums">
+            <div className="bg-white rounded-xl border border-gray-200 px-3 sm:px-4 py-2.5 sm:py-3 mb-3 sm:mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 shadow-2xs">
+              <div className="flex items-start sm:items-center gap-2 min-w-0">
+                <i className="fa-solid fa-layer-group text-saffron text-xs mt-0.5 sm:mt-0 shrink-0" />
+                <span className="text-xs sm:text-sm font-extrabold text-gray-800 leading-snug tabular-nums">
                   {catalogLoading
                     ? 'पूजा किट व पंडित लोड हो रहे हैं...'
                     : `${filteredListings.length} पूजा किट, वेंडर और पंडित उपलब्ध हैं (दिखाए जा रहे हैं: ${paginatedListings.length})`}
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 text-xs w-full sm:w-auto justify-end">
-                <span className="text-gray-400 font-semibold hidden md:inline">क्रमबद्ध करें:</span>
+              <div className="flex items-center justify-between sm:justify-end gap-2 text-xs w-full sm:w-auto pt-2 sm:pt-0 border-t border-gray-100 sm:border-0">
+                <span className="text-gray-500 font-bold shrink-0">क्रमबद्ध करें:</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="border border-gray-200 rounded-lg px-2.5 py-1.5 font-bold text-gray-700 bg-gray-50 focus:outline-none focus:border-abhiRed"
+                  className="flex-1 sm:flex-initial border border-gray-200 rounded-lg px-2.5 py-2 sm:py-1.5 font-bold text-gray-700 bg-gray-50 focus:outline-none focus:border-abhiRed min-w-0"
                 >
                   <option value="recommended">लोकप्रियता (Recommended)</option>
                   <option value="price_low">कीमत: कम से ज्यादा</option>
@@ -3018,9 +3007,265 @@ export default function App() {
         showToast={showToast}
       />
 
+      {/* ==================== FLOATING BOTTOM-RIGHT GLOBAL SEARCH BAR (ALL PAGES) ==================== */}
+      <div
+        ref={floatingSearchRef}
+        className="fixed bottom-4 right-3 sm:bottom-5 sm:right-5 z-50 flex flex-col items-end no-print"
+      >
+        {floatingSearchOpen ? (
+          <div className="w-[calc(100vw-1.5rem)] max-w-[420px] bg-white rounded-2xl shadow-2xl border-2 border-saffron/70 overflow-hidden animate-fadeIn">
+            {/* Live Results / Suggestions Panel (Above Input) */}
+            <div className="max-h-[52vh] overflow-y-auto box-scroll bg-white text-left">
+              <div className="px-3.5 py-2.5 bg-gradient-to-r from-abhiRed to-saffron text-white flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-xs font-extrabold">
+                  <i className="fa-solid fa-magnifying-glass" />
+                  <span>त्वरित खोज — पूजा, किट, पंडित व मूर्ति</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFloatingSearchOpen(false)}
+                  aria-label="खोज बंद करें"
+                  className="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center text-xs cursor-pointer"
+                >
+                  <i className="fa-solid fa-xmark" />
+                </button>
+              </div>
+
+              {!searchQuery.trim() ? (
+                <>
+                  {recentSearches.length > 0 && (
+                    <div className="px-3.5 py-2.5 bg-gray-50 border-b border-gray-100">
+                      <div className="text-[11px] font-bold text-gray-400 mb-1.5 flex items-center gap-1.5">
+                        <i className="fa-solid fa-clock-rotate-left" /> हाल की खोज
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {recentSearches.slice(0, 6).map((rs) => (
+                          <button
+                            key={rs}
+                            type="button"
+                            onClick={() => {
+                              setSearchQuery(rs);
+                              setActivePoojaTag('ALL');
+                              saveRecentSearch(rs);
+                              if (activePage !== 'home') {
+                                navigateToPage('home', { keepSearch: true });
+                              }
+                              setFloatingSearchOpen(false);
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="px-2.5 py-1 rounded-full bg-white border border-gray-200 hover:border-abhiRed text-xs font-bold text-gray-700 hover:text-abhiRed transition cursor-pointer"
+                          >
+                            {rs}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="px-3.5 py-2 bg-cream border-b border-orange-100 text-[11px] font-extrabold text-saffron">
+                    🔥 लोकप्रिय पूजा, किट और पंडित
+                  </div>
+                  <div className="divide-y divide-gray-100">
+                    {POPULAR_SEARCHES.slice(0, 6).map((item) => (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() => {
+                          const clean = item.tag
+                            ? item.label.split('(')[0].trim()
+                            : item.keyword || item.label;
+                          setSearchQuery(clean);
+                          setActivePoojaTag(item.tag || 'ALL');
+                          saveRecentSearch(clean);
+                          if (activePage !== 'home') {
+                            navigateToPage('home', { keepSearch: true });
+                          }
+                          setFloatingSearchOpen(false);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className="w-full text-left px-3.5 py-2.5 hover:bg-orange-50 flex items-center justify-between gap-2 transition cursor-pointer"
+                      >
+                        <span className="flex items-center gap-2 min-w-0">
+                          <i className="fa-solid fa-arrow-trend-up text-gray-400 text-xs shrink-0" />
+                          <span className="text-xs font-bold text-gray-800 truncate">
+                            {item.label}
+                          </span>
+                        </span>
+                        <span className="text-[10px] font-extrabold bg-red-50 text-abhiRed px-2 py-0.5 rounded-full shrink-0">
+                          {item.type}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  <div className="px-3.5 py-2 bg-orange-50/75 text-[11px] font-extrabold text-gray-800 flex items-center justify-between gap-2">
+                    <span className="truncate">
+                      "{searchQuery.trim()}" — {filteredListings.length} परिणाम
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        saveRecentSearch(searchQuery);
+                        if (activePage !== 'home') {
+                          navigateToPage('home', { keepSearch: true });
+                        }
+                        setFloatingSearchOpen(false);
+                        window.scrollTo({ top: 260, behavior: 'smooth' });
+                      }}
+                      className="text-abhiRed hover:underline shrink-0 cursor-pointer"
+                    >
+                      सभी देखें →
+                    </button>
+                  </div>
+
+                  {filteredListings.length === 0 ? (
+                    <div className="px-4 py-6 text-center text-xs text-gray-500">
+                      कोई परिणाम नहीं मिला — दूसरा शब्द लिखें या{' '}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFloatingSearchOpen(false);
+                          setCustomListModalOpen(true);
+                        }}
+                        className="text-abhiRed font-extrabold underline cursor-pointer"
+                      >
+                        कस्टम पर्ची अपलोड करें
+                      </button>
+                    </div>
+                  ) : (
+                    filteredListings.slice(0, 6).map((item) => {
+                      const price =
+                        item.category === 'pooja_box'
+                          ? getBoxCalculatedPrice(item)
+                          : item.basePrice;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            saveRecentSearch(searchQuery);
+                            setFloatingSearchOpen(false);
+                            if (activePage !== 'home') {
+                              navigateToPage('home', { keepSearch: true });
+                            }
+                            setPujaDetail({
+                              pujaName: item.title,
+                              categoryTitle: 'चयनित वैदिक पूजा सेवा',
+                              deityName: item.vendor,
+                              customSamagri: (item.items || [])
+                                .map((i) => `${i.name} (${i.unit})`)
+                                .join(', '),
+                              product: item,
+                            });
+                          }}
+                          className="w-full text-left px-3.5 py-2.5 hover:bg-orange-50/80 flex items-center justify-between gap-2.5 transition cursor-pointer"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-extrabold text-gray-900 truncate">
+                              {item.title}
+                            </div>
+                            <div className="text-[11px] text-gray-500 truncate mt-0.5">
+                              {item.vendor} • ⭐ {item.rating.toFixed(1)}
+                            </div>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <div className="text-xs font-extrabold text-abhiRed tabular-nums">
+                              ₹{price}
+                            </div>
+                            <div className="text-[10px] font-bold text-saffron">देखें →</div>
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Floating Search Input Bar */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (searchQuery.trim()) {
+                  saveRecentSearch(searchQuery);
+                  if (activePage !== 'home') {
+                    navigateToPage('home', { keepSearch: true });
+                  }
+                  setFloatingSearchOpen(false);
+                  window.scrollTo({ top: 260, behavior: 'smooth' });
+                }
+              }}
+              className="p-2 bg-orange-50/70 border-t border-orange-200 flex items-center gap-1.5"
+            >
+              <div className="flex-1 min-w-0 bg-white border border-orange-200 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5">
+                <input
+                  ref={floatingSearchInputRef}
+                  type="text"
+                  autoComplete="off"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setActivePoojaTag('ALL');
+                    setVisibleCount(10);
+                  }}
+                  placeholder="पूजा, किट, पंडित खोजें..."
+                  className="w-full bg-transparent text-sm font-bold text-gray-900 placeholder:font-medium placeholder:text-gray-400 focus:outline-none truncate"
+                />
+                {searchQuery.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setActivePoojaTag('ALL');
+                      floatingSearchInputRef.current?.focus();
+                    }}
+                    title="साफ़ करें"
+                    className="text-gray-400 hover:text-abhiRed p-0.5 text-sm shrink-0 cursor-pointer"
+                  >
+                    <i className="fa-solid fa-circle-xmark" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFloatingSearchOpen(false);
+                    startVoiceSearch();
+                  }}
+                  title="बोलकर खोजें"
+                  className="w-8 h-8 rounded-lg bg-red-50 hover:bg-abhiRed text-abhiRed hover:text-white flex items-center justify-center shrink-0 transition cursor-pointer"
+                >
+                  <i className="fa-solid fa-microphone text-xs" />
+                </button>
+              </div>
+              <button
+                type="submit"
+                className="shrink-0 h-10 px-3.5 rounded-xl bg-gradient-to-r from-abhiRed to-saffron hover:from-abhiRedDark hover:to-orange-600 text-white font-extrabold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i className="fa-solid fa-magnifying-glass text-xs" />
+                <span>खोजें</span>
+              </button>
+            </form>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setFloatingSearchOpen(true);
+            }}
+            aria-label="खोजें (Search)"
+            title="खोजें"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-[#e31b2e] via-[#ef3316] to-[#f25600] hover:from-[#be1225] hover:via-[#d9260d] hover:to-[#dc4b00] text-white border-2 border-white ring-1 ring-black/20 shadow-[0_8px_20px_-4px_rgba(227,27,46,0.55),0_2px_6px_rgba(0,0,0,0.22)] flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          >
+            <i className="fa-solid fa-microphone text-base sm:text-lg drop-shadow-[0_1px_1px_rgba(0,0,0,0.3)]" />
+          </button>
+        )}
+      </div>
+
       {/* ==================== TOAST ==================== */}
       {toastMsg && (
-        <div className="fixed bottom-5 right-5 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-lg text-xs sm:text-sm font-semibold flex items-center gap-2 z-[60] no-print">
+        <div className="fixed bottom-20 right-4 sm:right-5 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-lg text-xs sm:text-sm font-semibold flex items-center gap-2 z-[60] no-print">
           <i className="fa-solid fa-circle-check text-green-400" />
           <span>{toastMsg}</span>
         </div>

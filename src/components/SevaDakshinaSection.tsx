@@ -109,27 +109,27 @@ export const SevaDakshinaSection: React.FC<SevaDakshinaSectionProps> = ({
   return (
     <section
       id="seva-dakshina-section"
-      className="mt-12 bg-gradient-to-br from-amber-50/75 via-white to-orange-50/75 rounded-2xl border border-amber-200 shadow-xs p-5 sm:p-7"
+      className="mt-8 sm:mt-12 bg-gradient-to-br from-amber-50/75 via-white to-orange-50/75 rounded-xl sm:rounded-2xl border border-amber-200 shadow-xs p-3.5 sm:p-6 md:p-7"
     >
-      <div className="text-center max-w-2xl mx-auto mb-6">
-        <div className="text-xs font-extrabold tracking-wide text-saffron mb-1">
+      <div className="text-center max-w-2xl mx-auto mb-4 sm:mb-6">
+        <div className="text-[11px] sm:text-xs font-extrabold tracking-wide text-saffron mb-1">
           100% श्रद्धा · त्वरित UPI QR व डिजिटल आशीर्वाद रसीद
         </div>
-        <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900">
+        <h2 className="text-lg sm:text-2xl font-extrabold text-gray-900 leading-snug">
           धार्मिक सेवा एवं श्रद्धा दक्षिणा (Seva Dakshina)
         </h2>
-        <p className="text-xs sm:text-sm text-gray-600 mt-1">
+        <p className="text-[11px] sm:text-sm text-gray-600 mt-1 leading-relaxed">
           गौ सेवा, मंदिर दीपदान, अन्नदान या मंदिर दक्षिणा के लिए अपनी इच्छानुसार राशि अर्पण करें और तुरंत डिजिटल रसीद प्राप्त करें।
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-7 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
+        <div className="lg:col-span-7 space-y-3.5 sm:space-y-4">
           <div>
             <div className="text-xs font-extrabold text-gray-800 mb-2">
               चरण 1: सेवा का उद्देश्य चुनें
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
               {CAUSES.map((c) => (
                 <button
                   key={c}
@@ -137,8 +137,8 @@ export const SevaDakshinaSection: React.FC<SevaDakshinaSectionProps> = ({
                   onClick={() => setCause(c)}
                   className={
                     cause === c
-                      ? 'px-3.5 py-2.5 rounded-xl border border-saffron bg-orange-50 text-saffron font-extrabold text-xs text-left transition cursor-pointer'
-                      : 'px-3.5 py-2.5 rounded-xl border border-gray-200 hover:border-orange-300 bg-white text-gray-800 font-bold text-xs text-left transition cursor-pointer'
+                      ? 'px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl border border-saffron bg-orange-50 text-saffron font-extrabold text-[11px] sm:text-xs text-left leading-snug transition cursor-pointer'
+                      : 'px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl border border-gray-200 hover:border-orange-300 bg-white text-gray-800 font-bold text-[11px] sm:text-xs text-left leading-snug transition cursor-pointer'
                   }
                 >
                   {c}
@@ -151,7 +151,7 @@ export const SevaDakshinaSection: React.FC<SevaDakshinaSectionProps> = ({
             <div className="text-xs font-extrabold text-gray-800 mb-2">
               चरण 2: श्रद्धा राशि (Amount) चुनें या लिखें
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-2.5">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2 mb-2.5">
               {QUICK_AMOUNTS.map((amt) => (
                 <button
                   key={amt}
@@ -192,7 +192,7 @@ export const SevaDakshinaSection: React.FC<SevaDakshinaSectionProps> = ({
                 value={donorName}
                 onChange={(e) => setDonorName(e.target.value)}
                 placeholder="जैसे: राजेश शर्मा"
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs font-semibold bg-white focus:outline-none focus:border-abhiRed"
+                className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-xl text-xs font-semibold bg-white focus:outline-none focus:border-abhiRed"
               />
             </div>
             <div>
@@ -204,28 +204,28 @@ export const SevaDakshinaSection: React.FC<SevaDakshinaSectionProps> = ({
                 value={donorCity}
                 onChange={(e) => setDonorCity(e.target.value)}
                 placeholder="जैसे: जमशेदपुर / भारद्वाज"
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-xs font-semibold bg-white focus:outline-none focus:border-abhiRed"
+                className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-xl text-xs font-semibold bg-white focus:outline-none focus:border-abhiRed"
               />
             </div>
           </div>
 
-          <div className="bg-white border border-amber-200 rounded-xl p-3.5">
-            <div className="flex justify-between text-xs font-extrabold text-amber-950 mb-1.5">
+          <div className="bg-white border border-amber-200 rounded-xl p-3 sm:p-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] sm:text-xs font-extrabold text-amber-950 mb-1.5">
               <span>🎯 साप्ताहिक गौ सेवा एवं अन्नदान संकल्प</span>
-              <span>74% पूर्ण</span>
+              <span className="shrink-0">74% पूर्ण</span>
             </div>
-            <div className="w-full h-2.5 bg-amber-100 rounded-full overflow-hidden mb-2">
+            <div className="w-full h-2 sm:h-2.5 bg-amber-100 rounded-full overflow-hidden mb-2">
               <div className="h-full w-[74%] bg-gradient-to-r from-saffron to-abhiRed rounded-full" />
             </div>
-            <div className="flex items-center gap-2 text-xs text-gray-600 font-medium">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-ping shrink-0" />
-              <span>{tickerItems[tickerIdx]}</span>
+            <div className="flex items-start sm:items-center gap-2 text-[11px] sm:text-xs text-gray-600 font-medium leading-snug">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-ping shrink-0 mt-1 sm:mt-0" />
+              <span className="min-w-0 break-words">{tickerItems[tickerIdx]}</span>
             </div>
           </div>
         </div>
 
-        <div className="lg:col-span-5 bg-white border-2 border-dashed border-amber-300 rounded-2xl p-5 text-center shadow-2xs">
-          <div className="bg-orange-50 text-saffron border border-orange-200 rounded-xl py-2 px-3 text-xs font-extrabold mb-3">
+        <div className="lg:col-span-5 bg-white border-2 border-dashed border-amber-300 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-center shadow-2xs">
+          <div className="bg-orange-50 text-saffron border border-orange-200 rounded-xl py-2 px-3 text-xs font-extrabold mb-3 break-words">
             {cause} — ₹{safeAmt}
           </div>
           <img
@@ -235,21 +235,21 @@ export const SevaDakshinaSection: React.FC<SevaDakshinaSectionProps> = ({
               e.currentTarget.onerror = null;
               e.currentTarget.src = 'https://placehold.co/180x180/fff7ed/ea580c?text=UPI+QR';
             }}
-            className="w-40 h-40 mx-auto rounded-xl border border-gray-200 p-1.5 bg-white mb-3"
+            className="w-36 h-36 sm:w-40 sm:h-40 mx-auto rounded-xl border border-gray-200 p-1.5 bg-white mb-3"
           />
-          <div className="flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-1.5 mb-3 text-xs font-extrabold text-amber-950">
-            <span>{settings.upiId}</span>
+          <div className="flex items-center justify-between sm:justify-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-1.5 mb-3 text-xs font-extrabold text-amber-950 min-w-0">
+            <span className="truncate">{settings.upiId}</span>
             <button
               type="button"
               onClick={handleCopyUpi}
-              className="bg-amber-900 hover:bg-black text-white px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer"
+              className="shrink-0 bg-amber-900 hover:bg-black text-white px-2.5 py-1 rounded-lg text-[11px] font-bold cursor-pointer"
             >
               Copy
             </button>
           </div>
           <a
             href={upiUrl}
-            className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-2.5 rounded-xl text-xs sm:text-sm shadow-xs transition mb-2"
+            className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3 sm:py-2.5 px-3 rounded-xl text-xs sm:text-sm shadow-xs transition mb-2"
           >
             <i className="fa-solid fa-mobile-screen-button mr-1.5" />
             PhonePe / GPay / Paytm से अर्पण करें
@@ -258,7 +258,7 @@ export const SevaDakshinaSection: React.FC<SevaDakshinaSectionProps> = ({
             type="button"
             disabled={saving}
             onClick={handleGenerateReceipt}
-            className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-extrabold py-2.5 rounded-xl text-xs sm:text-sm shadow-xs transition cursor-pointer"
+            className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white font-extrabold py-3 sm:py-2.5 px-3 rounded-xl text-xs sm:text-sm shadow-xs transition cursor-pointer"
           >
             <i className="fa-solid fa-receipt mr-1.5" />
             {saving ? 'रसीद बन रही है...' : 'दक्षिणा भेज दी — रसीद प्राप्त करें'}

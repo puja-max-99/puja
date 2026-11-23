@@ -397,7 +397,9 @@ export async function ensureSeeded(): Promise<void> {
         }
       }
 
-      await ensureRoleAccountsAndProfiles();
+      if (process.env.SEED_DEMO_ACCOUNTS !== 'false') {
+        await ensureRoleAccountsAndProfiles();
+      }
       seededDone = true;
     } catch (error) {
       seedPromise = null;
